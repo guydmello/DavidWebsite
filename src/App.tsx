@@ -3,7 +3,8 @@ import { AnimatePresence } from 'framer-motion'
 import { ArrowDown, ArrowRight, BookOpenText, Sparkles } from 'lucide-react'
 import { BrandMark } from './components/BrandMark'
 import { FamilyEnvelope } from './components/FamilyEnvelope'
-import { HouseFavouriteCard, type HouseFavourite } from './components/HouseFavouriteCard'
+import { FavouriteCollection } from './components/FavouriteCollection'
+import type { HouseFavourite } from './components/HouseFavouriteCard'
 import { JournalNotesModal } from './components/JournalNotesModal'
 import { MenuCatalog } from './components/MenuCatalog'
 import { ToolNavigation } from './components/ToolNavigation'
@@ -99,7 +100,7 @@ export default function App() {
               <p className="eyebrow"><span /> Gia đình · family</p>
               <h3>Meet the family<br />&amp; bakers.</h3>
               <p>The Recipe Àrchive is shaped by family memory and the bakers who translate those flavours into pastries for the present.</p>
-              <p>This space is reserved for portraits and individual introductions as those stories are documented. Until then, the recipes remain the clearest introduction to the hands and memories behind the collection.</p>
+              <p>At the kitchen table, familiar motions pass from one pair of hands to another—shaping, filling and finishing pastries through the quiet rhythm of baking together.</p>
             </div>
           </div>
         </section>
@@ -110,9 +111,7 @@ export default function App() {
             <h2>Favourites from<br /><em>the Àrchive.</em></h2>
             <p>Six bakes we return to for their flavour, feeling and connection to the stories held by the archive.</p>
           </header>
-          <div className="featured-grid">
-            {archiveFeatures.map((product) => <HouseFavouriteCard product={product} key={product.entry} />)}
-          </div>
+          <FavouriteCollection products={archiveFeatures} />
         </section>
 
         <section className="new-recipes section-shell section-block" id="new-recipes">

@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
-import { AnimatePresence } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { AnimatePresence, useReducedMotion } from 'framer-motion'
+import { ArrowRight, ChevronRight } from 'lucide-react'
 import { ArchiveEntryModal, type ArchiveEntry } from './ArchiveEntryModal'
 
 type MenuCategory = {
@@ -113,15 +113,61 @@ function archiveStory(categoryId: string, product: string) {
 }
 
 export function MenuCatalog() {
+  const reduceMotion = useReducedMotion()
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedEntry, setSelectedEntry] = useState<ArchiveEntry | null>(null)
+  const [hasMoreTabs, setHasMoreTabs] = useState(false)
+  const [showSwipeHint, setShowSwipeHint] = useState(true)
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null)
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const activeCategory = menuCategories[activeIndex]
   const closeEntry = useCallback(() => setSelectedEntry(null), [])
 
+  const updateOverflowCue = useCallback(() => {
+    const tabs = tabsContainerRef.current
+    if (!tabs) return
+    setHasMoreTabs(tabs.scrollLeft + tabs.clientWidth < tabs.scrollWidth - 2)
+  }, [])
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updateOverflowCue)
+    window.addEventListener('resize', updateOverflowCue)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('resize', updateOverflowCue)
+    }
+  }, [updateOverflowCue])
+
+  const scrollTabIntoView = (index: number) => {
+    const tabs = tabsContainerRef.current
+    const tab = tabRefs.current[index]
+    if (!tabs || !tab) return
+
+    const padding = 14
+    const tabLeft = tab.offsetLeft
+    const tabRight = tabLeft + tab.offsetWidth
+    const visibleLeft = tabs.scrollLeft + padding
+    const visibleRight = tabs.scrollLeft + tabs.clientWidth - padding
+
+    if (tabLeft < visibleLeft || tabRight > visibleRight) {
+      const nextLeft = tabLeft < visibleLeft
+        ? tabLeft - padding
+        : tabRight - tabs.clientWidth + padding
+      tabs.scrollTo({ left: Math.max(0, nextLeft), behavior: reduceMotion ? 'auto' : 'smooth' })
+    }
+  }
+
   const selectCategory = (index: number) => {
+    if (index !== activeIndex) setShowSwipeHint(false)
     setActiveIndex(index)
-    tabRefs.current[index]?.focus()
+    tabRefs.current[index]?.focus({ preventScroll: true })
+    scrollTabIntoView(index)
+  }
+
+  const handleTabScroll = () => {
+    const tabs = tabsContainerRef.current
+    if (tabs && tabs.scrollLeft > 2) setShowSwipeHint(false)
+    updateOverflowCue()
   }
 
   const handleTabKeyDown = (event: KeyboardEvent, index: number) => {
@@ -139,8 +185,14 @@ export function MenuCatalog() {
 
   return (
     <div className="catalog">
-      <div className="catalog-tabs-wrap">
-        <div className="catalog-tabs" role="tablist" aria-label="Menu categories">
+      <div className="catalog-tabs-wrap" data-overflow={hasMoreTabs}>
+        <div
+          className="catalog-tabs"
+          ref={tabsContainerRef}
+          role="tablist"
+          aria-label="Menu categories"
+          onScroll={handleTabScroll}
+        >
           {menuCategories.map((category, index) => (
             <button
               key={category.id}
@@ -160,7 +212,11 @@ export function MenuCatalog() {
             </button>
           ))}
         </div>
+        <span className="catalog-tabs__cue" aria-hidden="true"><ChevronRight /></span>
       </div>
+      <p className={`catalog-tabs__hint ${showSwipeHint ? '' : 'catalog-tabs__hint--hidden'}`}>
+        Swipe to explore categories
+      </p>
 
       <div
         className="catalog-panel"

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 
 const appSource = readFileSync('src/App.tsx', 'utf8')
@@ -17,14 +17,19 @@ test('New Recipes uses compact spacing and still precedes the menu', () => {
   assert.match(styles, /\.new-recipes \.section-heading \{ margin-bottom: 38px/)
 })
 
-test('the family placeholder is a keyboard-accessible opening envelope', () => {
+test('the family envelope extracts a responsive documentary photograph', () => {
   assert.match(appSource, /<FamilyEnvelope \/>/)
-  assert.match(envelopeSource, /<button/)
-  assert.match(envelopeSource, /aria-expanded=\{isOpen\}/)
-  assert.match(envelopeSource, /setIsOpen\(\(open\) => !open\)/)
-  assert.match(envelopeSource, /Photograph forthcoming/)
-  assert.doesNotMatch(envelopeSource, /onMouseEnter|onMouseOver/)
-  assert.match(styles, /\.family-envelope--open \.family-envelope__flap \{[^}]*rotateX\(180deg\)/)
-  assert.match(styles, /\.family-envelope--open \.family-envelope__portrait \{[^}]*translateY\(-13%\)/)
-  assert.match(styles, /\.family-envelope__button:focus-visible/)
+  assert.doesNotMatch(appSource + envelopeSource, /Photograph forthcoming|reserved for portraits|placeholder/i)
+  assert.match(envelopeSource, /type EnvelopeState = 'closed' \| 'opening' \| 'open' \| 'closing'/)
+  assert.match(envelopeSource, /aria-expanded=\{isExpanded\}/)
+  assert.match(envelopeSource, /disabled=\{isAnimating\}/)
+  assert.match(envelopeSource, /Family bakers shaping pastries together at a kitchen table\./)
+  assert.match(envelopeSource, /srcSet="\/family-bakers-640\.webp 640w, \/family-bakers-1200\.webp 1200w"/)
+  assert.match(envelopeSource, /loading="lazy"/)
+  assert.ok(existsSync('public/family-bakers-640.webp'))
+  assert.ok(existsSync('public/family-bakers-1200.webp'))
+  assert.match(styles, /\.family-envelope__portrait-clip \{[^}]*z-index: 2;[^}]*clip-path: inset\(-100% 0 0 0\)/)
+  assert.match(styles, /\.family-envelope__front \{[^}]*z-index: 4;/)
+  assert.match(styles, /\.family-envelope--flap-open \.family-envelope__flap \{[^}]*rotateX\(180deg\)/)
+  assert.match(styles, /\.family-envelope--portrait-raised \.family-envelope__portrait \{[^}]*translateY\(-20%\)/)
 })
