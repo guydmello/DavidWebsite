@@ -24,7 +24,7 @@ test('the family envelope extracts a responsive documentary photograph', () => {
   assert.match(envelopeSource, /aria-expanded=\{isExpanded\}/)
   assert.match(envelopeSource, /disabled=\{isAnimating\}/)
   assert.match(envelopeSource, /Family bakers shaping pastries together at a kitchen table\./)
-  assert.match(envelopeSource, /srcSet="\/family-bakers-640\.webp 640w, \/family-bakers-1200\.webp 1200w"/)
+  assert.match(envelopeSource, /srcSet=\{`\$\{import\.meta\.env\.BASE_URL\}family-bakers-640\.webp 640w, \$\{import\.meta\.env\.BASE_URL\}family-bakers-1200\.webp 1200w`\}/)
   assert.match(envelopeSource, /loading="lazy"/)
   assert.ok(existsSync('public/family-bakers-640.webp'))
   assert.ok(existsSync('public/family-bakers-1200.webp'))

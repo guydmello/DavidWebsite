@@ -65,8 +65,8 @@ export default function App() {
             <figure className="photo-card">
               <span className="photo-card__label">Archive study / 001</span>
               <img
-                src="/recipe-archive-hero.jpg"
-                srcSet="/recipe-archive-hero-640.jpg 640w, /recipe-archive-hero.jpg 1024w"
+                src={`${import.meta.env.BASE_URL}recipe-archive-hero.jpg`}
+                srcSet={`${import.meta.env.BASE_URL}recipe-archive-hero-640.jpg 640w, ${import.meta.env.BASE_URL}recipe-archive-hero.jpg 1024w`}
                 sizes="(max-width: 680px) calc(100vw - 46px), (max-width: 900px) 85vw, 46vw"
                 alt="Ube crinkle cookie, matcha cheesecake and mango tart arranged on a deep green ceramic plate"
                 width="1024"
