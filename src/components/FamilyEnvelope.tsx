@@ -85,8 +85,8 @@ export function FamilyEnvelope() {
           <span className="family-envelope__portrait-clip">
             <span className="family-envelope__portrait">
               <img
-                src="/family-bakers-1200.webp"
-                srcSet="/family-bakers-640.webp 640w, /family-bakers-1200.webp 1200w"
+                src={`${import.meta.env.BASE_URL}family-bakers-1200.webp`}
+                srcSet={`${import.meta.env.BASE_URL}family-bakers-640.webp 640w, ${import.meta.env.BASE_URL}family-bakers-1200.webp 1200w`}
                 sizes="(max-width: 680px) calc(82vw - 50px), (max-width: 900px) 68vw, 40vw"
                 alt="Family bakers shaping pastries together at a kitchen table."
                 width="1200"

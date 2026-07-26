@@ -8,7 +8,7 @@ export function BrandMark({ className = '', variant = 'light', decorative = fals
   return (
     <img
       className={`brand-mark brand-mark--${variant} ${className}`.trim()}
-      src={`/brand/recipe-archive-mark-${variant}.png`}
+      src={`${import.meta.env.BASE_URL}brand/recipe-archive-mark-${variant}.png`}
       alt={decorative ? '' : 'The Recipe Àrchive emblem'}
       aria-hidden={decorative || undefined}
       width="512"
