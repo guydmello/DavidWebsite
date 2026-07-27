@@ -38,9 +38,9 @@ test('the supplied logo is available in light and reverse contexts', () => {
   assert.match(appSource, /<BrandMark className="footer-mark" variant="reverse" decorative/)
 })
 
-test('the reverse white mark is used as the browser tab icon', () => {
-  assert.match(metadata, /rel="icon"[^>]+recipe-archive-mark-reverse\.png/)
-  assert.match(metadata, /rel="apple-touch-icon"[^>]+recipe-archive-mark-reverse\.png/)
+test('the green mark on its light circular field is used as the browser tab icon', () => {
+  assert.match(metadata, /rel="icon"[^>]+recipe-archive-mark-light\.png\?v=2/)
+  assert.match(metadata, /rel="apple-touch-icon"[^>]+recipe-archive-mark-light\.png\?v=2/)
 })
 
 test('technical metadata uses the compatibility-safe unaccented name', () => {
