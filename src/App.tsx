@@ -26,16 +26,47 @@ const newRecipes = [
 ]
 
 export default function App() {
-  const [inquiryStatus, setInquiryStatus] = useState<'idle' | 'error' | 'ready'>('idle')
+  const [inquiryStatus, setInquiryStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [inquiryError, setInquiryError] = useState('')
   const [journalIsOpen, setJournalIsOpen] = useState(false)
   useInPageNavigation()
 
-  const handleInquirySubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleInquirySubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setInquiryStatus('ready')
+    const form = event.currentTarget
+
+    setInquiryStatus('submitting')
+    setInquiryError('')
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      })
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null) as { errors?: Array<{ message?: string }> } | null
+        const formspreeMessage = result?.errors?.map((error) => error.message).filter(Boolean).join(' ')
+        const fallbackMessage = response.status === 429
+          ? 'Too many inquiries were sent at once. Please wait a moment and try again.'
+          : 'We could not send your inquiry. Please try again.'
+
+        setInquiryError(formspreeMessage || fallbackMessage)
+        setInquiryStatus('error')
+        return
+      }
+
+      form.reset()
+      setInquiryStatus('success')
+    } catch {
+      setInquiryError('We could not connect to the inquiry service. Please check your connection and try again.')
+      setInquiryStatus('error')
+    }
   }
 
   const handleInquiryInvalid = () => {
+    setInquiryError('Please complete the required name and email fields.')
     setInquiryStatus('error')
   }
 
@@ -187,9 +218,17 @@ export default function App() {
             <form
               id="order-inquiry-form"
               className="inquiry-form"
+              action="https://formspree.io/f/xpqvkdvv"
+              method="POST"
               onSubmit={handleInquirySubmit}
               onInvalid={handleInquiryInvalid}
-              onInput={() => inquiryStatus === 'error' && setInquiryStatus('idle')}
+              onInput={() => {
+                if (inquiryStatus === 'error') {
+                  setInquiryStatus('idle')
+                  setInquiryError('')
+                }
+              }}
+              aria-busy={inquiryStatus === 'submitting'}
             >
               <div>
                 <label htmlFor="name">Name</label>
@@ -211,14 +250,21 @@ export default function App() {
                 <label htmlFor="message">Order notes</label>
                 <textarea id="message" name="message" rows={4} />
               </div>
-              <button className="button button--cream inquiry-form__submit" type="submit">Send inquiry <ArrowRight /></button>
+              <button
+                className="button button--cream inquiry-form__submit"
+                type="submit"
+                disabled={inquiryStatus === 'submitting'}
+              >
+                {inquiryStatus === 'submitting' ? 'Sending inquiry…' : 'Send inquiry'} <ArrowRight />
+              </button>
               <p
                 className={`inquiry-form__status inquiry-form__status--${inquiryStatus}`}
                 role={inquiryStatus === 'error' ? 'alert' : 'status'}
                 aria-live="polite"
               >
-                {inquiryStatus === 'error' && 'Please complete the required name and email fields.'}
-                {inquiryStatus === 'ready' && 'Your details look complete. Ordering delivery can now be connected to this form.'}
+                {inquiryStatus === 'submitting' && 'Sending your inquiry…'}
+                {inquiryStatus === 'error' && inquiryError}
+                {inquiryStatus === 'success' && 'Thank you. Your inquiry has been sent to The Recipe Àrchive.'}
               </p>
             </form>
             <footer>
